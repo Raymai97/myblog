@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Visual C++ supports UTF-8 string literal since VC6.0 (Updated)</title>
+  <meta name="description" content="If you’re here for Visual C++ 6.0, click here.">
+
+  <link rel="stylesheet" href="/myblog/assets/main.css">
+  <link rel="canonical" href="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6">
+  <link rel="alternate" type="application/rss+xml" title="myblog - raymai97" href="/myblog/feed.xml">
+  
+  
+  
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Visual C++ supports UTF-8 string literal since VC6.0 (Updated) | myblog - raymai97</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Visual C++ supports UTF-8 string literal since VC6.0 (Updated)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="If you’re here for Visual C++ 6.0, click here." />
+<meta property="og:description" content="If you’re here for Visual C++ 6.0, click here." />
+<link rel="canonical" href="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6" />
+<meta property="og:url" content="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6" />
+<meta property="og:site_name" content="myblog - raymai97" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-05-04T21:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Visual C++ supports UTF-8 string literal since VC6.0 (Updated)" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"Visual C++ supports UTF-8 string literal since VC6.0 (Updated)","dateModified":"2017-05-04T21:00:00+08:00","datePublished":"2017-05-04T21:00:00+08:00","description":"If you’re here for Visual C++ 6.0, click here.","url":"https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6","mainEntityOfPage":{"@type":"WebPage","@id":"https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/myblog/">myblog - raymai97</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/myblog/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Visual C++ supports UTF-8 string literal since VC6.0 (Updated)</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2017-05-04T21:00:00+08:00" itemprop="datePublished">May 4, 2017
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>If you’re here for Visual C++ 6.0, <a href="#vc6">click here</a>.</p>
+
+<p>I’m not sure about Visual C++ 7.0 and 7.1 (.NET 2002 and 2003), but since 8.0 (2005), Visual C++ compiler already supports  source file with UTF-8 no BOM encoding. It is just that, for it to work as expected, you need to follow a rule that no one in Microsoft will ever tell you. Now we are in 2017 and I have failed to find any thread or article that emphasizes it, that’s why I think I need to write this.</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/screenshot.png" alt="img" /></p>
+
+<p>Here is the test source file we will use today: <a href="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/utf8-string-literal-test.cpp">utf8-string-literal-test.cpp</a></p>
+
+<h3 id="for-visual-c-80-and-above">For Visual C++ 8.0 and above</h3>
+
+<p>To get your UTF-8 source files compiled correctly, you must save in <strong>UTF-8 without BOM</strong> encoding, and the <strong>system locale (non-Unicode language) must be English.</strong></p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/ansi-must-be-english.png" alt="img" /></p>
+
+<p>I know this looks like bullshit and a bit racist, but that is what my test result tells me.</p>
+
+<p>Here is what I get if I compile this file when my system locale is set to Japanese:</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/japanese-locale-vc8.png" alt="img" /></p>
+
+<p>See? If the source file doesn’t contain BOM (byte-order mark), and your system locale is not English, VC will assume that your source file is not in Unicode. <em>What a <strong>bold</strong> assumption.</em> I think this is yet another compatibility trick by Microsoft. If you are sure your source file always use UTF-8 without BOM, you may mod the compiler so it stops making such assumption.</p>
+
+<h3 id="mod-the-compiler-for-visual-c-80-and-above-only">Mod the compiler (for Visual C++ 8.0 and above only)</h3>
+
+<p>I don’t like the idea of changing system locale, so I mod the compiler instead. This is how it looks like after I have modded my compiler:</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/japanese-locale-vc8-modded.png" alt="img" /></p>
+
+<p>Before you proceed, you should know that it is always a good idea to backup your compiler files. Better safe than sorry, right?</p>
+
+<h4 id="step-1-determine-what-to-mod">Step 1: Determine what to mod</h4>
+
+<p>Since this is related with character set, I <code class="language-plaintext highlighter-rouge">grep</code> for related API such as <code class="language-plaintext highlighter-rouge">WideCharToMultiByte</code>, then I choose a few files I think I needed to mod. For this example, I choose <code class="language-plaintext highlighter-rouge">cl.exe</code>, <code class="language-plaintext highlighter-rouge">c1.dll</code>, <code class="language-plaintext highlighter-rouge">c1xx.dll</code> and <code class="language-plaintext highlighter-rouge">c2.dll</code>.</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/grep-widechartomultibyte.png" alt="img" /></p>
+
+<h4 id="step-2-mod-the-files-to-load-kernel31-instead">Step 2: Mod the files to load <code class="language-plaintext highlighter-rouge">kernel31</code> instead</h4>
+
+<p>Open the file in hex editor. Search for <code class="language-plaintext highlighter-rouge">kernel32.dll</code> string and replace it with <code class="language-plaintext highlighter-rouge">kernel31.dll</code> string. If there are multiple occurences, choose the one that is surrounded by many API names.</p>
+
+<h4 id="step-3-assert-codepage-1252-in-your-kernel31">Step 3: Assert codepage 1252 in your <code class="language-plaintext highlighter-rouge">kernel31</code></h4>
+
+<p>If you don’t know <code class="language-plaintext highlighter-rouge">kernel31</code>, please look forward to a future post I will write someday.</p>
+
+<p>In your <code class="language-plaintext highlighter-rouge">kernel31</code> project, you need to redirect two functions to your own implementation, <code class="language-plaintext highlighter-rouge">MultiByteToWideChar</code> and <code class="language-plaintext highlighter-rouge">WideCharToMultiByte</code>. The idea is, if the incoming codepage is not <code class="language-plaintext highlighter-rouge">CP_UTF8</code>, change it to <code class="language-plaintext highlighter-rouge">1252</code> (English codepage), and then return <code class="language-plaintext highlighter-rouge">MultiByteToWideChar</code> or <code class="language-plaintext highlighter-rouge">WideCharToMultiByte</code>. This is how I coded it:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">KERNEL31_API</span> <span class="kt">int</span> <span class="kr">__stdcall</span>
+<span class="nf">My_MultiByteToWideChar</span><span class="p">(</span>
+    <span class="n">UINT</span> <span class="n">codepage</span><span class="p">,</span> <span class="n">DWORD</span> <span class="n">dwFlags</span><span class="p">,</span> <span class="n">LPCSTR</span> <span class="n">szMulti</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cbMulti</span><span class="p">,</span>
+    <span class="n">LPWSTR</span> <span class="n">szWide</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cchWide</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">codepage</span> <span class="o">!=</span> <span class="n">CP_UTF8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">codepage</span> <span class="o">=</span> <span class="mi">1252</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">MultiByteToWideChar</span><span class="p">(</span><span class="n">codepage</span><span class="p">,</span> <span class="n">dwFlags</span><span class="p">,</span> <span class="n">szMulti</span><span class="p">,</span> <span class="n">cbMulti</span><span class="p">,</span>
+        <span class="n">szWide</span><span class="p">,</span> <span class="n">cchWide</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">KERNEL31_API</span> <span class="kt">int</span> <span class="kr">__stdcall</span>
+<span class="nf">My_WideCharToMultiByte</span><span class="p">(</span>
+    <span class="n">UINT</span> <span class="n">codepage</span><span class="p">,</span> <span class="n">DWORD</span> <span class="n">dwFlags</span><span class="p">,</span> <span class="n">LPCWSTR</span> <span class="n">szWide</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cchWide</span><span class="p">,</span>
+    <span class="n">LPSTR</span> <span class="n">szMulti</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cbMulti</span><span class="p">,</span> <span class="n">LPCSTR</span> <span class="n">lpDefChar</span><span class="p">,</span> <span class="n">LPBOOL</span> <span class="n">lpUsedDefChar</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">codepage</span> <span class="o">!=</span> <span class="n">CP_UTF8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">codepage</span> <span class="o">=</span> <span class="mi">1252</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">WideCharToMultiByte</span><span class="p">(</span><span class="n">codepage</span><span class="p">,</span> <span class="n">dwFlags</span><span class="p">,</span> <span class="n">szWide</span><span class="p">,</span> <span class="n">cchWide</span><span class="p">,</span>
+        <span class="n">szMulti</span><span class="p">,</span> <span class="n">cbMulti</span><span class="p">,</span> <span class="n">lpDefChar</span><span class="p">,</span> <span class="n">lpUsedDefChar</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If you prefer to download the one I created instead:<br />
+<a href="Kernel31-vc8.7z">Kernel31 for VC8.0 (VC2005)</a><br />
+<a href="Kernel31-vc14.7z">Kernel31 for VC14.0 (VC2015)</a></p>
+
+<h4 id="step-4-showtime">Step 4: Showtime</h4>
+
+<p>Just put the <code class="language-plaintext highlighter-rouge">kernel31.dll</code> into the compiler directory, and you’re done.</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc8-dir-after-mod.png" alt="img" /></p>
+
+<p>Congraz! Now your VC can compile UTF-8 source file without BOM! No more crappy BOM or UTF-16!</p>
+
+<p><a name="vc6"></a></p>
+<h3 id="for-visual-c-60">For Visual C++ 6.0</h3>
+
+<p>Let me make one thing clear, <strong>the IDE of Visual C++ 6.0 itself doesn’t know anything about Unicode.</strong> The moment you open your UTF-8 source file in the IDE, you’re doomed. You <strong>must use command-line to compile such thing with VC6.0</strong>. In fact, the compiler doesn’t know Unicode too, but because <strong>UTF-8 is a multi-byte character set</strong>, it happens to support such encoding too, with a little bit issue of course.</p>
+
+<p>Let’s see what would happen if we compile the source file with VC6.0 compiler.</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6.png" alt="img" /></p>
+
+<p>This is the issue I was talking about. To fix it, just append a space to the problematic string literal.</p>
+
+<p><strong>UPDATE May 11: <a href="#vc6-localeName">A better way has been discovered</a>.</strong></p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-fixed.png" alt="img" /></p>
+
+<p>信じられない？ See for yourself:<br />
+<a href="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/utf8-string-literal-test-vc6-exe.7z">utf8-string-literal-test-vc6-exe.7z</a></p>
+
+<h3 id="update-file-encoding-plays-role-too">UPDATE: File encoding plays role too</h3>
+
+<p>You might think that as long as your system locale is English, which enable MSVC to compile UTF-8 source file, the string literal in your source file will always be UTF-8. This is NOT true. Here is the pseudocode that describes the MSVC behavior:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="n">ansi_codepage</span> <span class="o">==</span> <span class="mi">1252</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">open_source_file_with_encoding</span><span class="p">(</span><span class="n">utf_8</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="p">{</span>
+    <span class="n">open_source_file_with_encoding</span><span class="p">(</span><span class="n">ansi_codepage</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">copy_string_literal_into_exe_with_encoding</span><span class="p">(</span><span class="n">file_encoding</span><span class="p">);</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ANSI CP</th>
+      <th>Source file CP</th>
+      <th>String literal CP in EXE</th>
+      <th>Conversion flow</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1252</td>
+      <td>UTF-8</td>
+      <td>UTF-8</td>
+      <td>UTF-8 -&gt; wide -&gt; UTF-8</td>
+    </tr>
+    <tr>
+      <td>1252</td>
+      <td>932</td>
+      <td>932</td>
+      <td>UTF-8 -&gt; wide -&gt; 932</td>
+    </tr>
+    <tr>
+      <td>1252</td>
+      <td>936</td>
+      <td>936</td>
+      <td>UTF-8 -&gt; wide-&gt; 936</td>
+    </tr>
+    <tr>
+      <td>936</td>
+      <td>UTF-8</td>
+      <td>UTF-8</td>
+      <td>936 -&gt; wide -&gt; UTF8</td>
+    </tr>
+    <tr>
+      <td>936</td>
+      <td>932</td>
+      <td>932</td>
+      <td>936 -&gt; wide -&gt; 932</td>
+    </tr>
+    <tr>
+      <td>936</td>
+      <td>936</td>
+      <td>936</td>
+      <td>936 -&gt; wide -&gt; 936</td>
+    </tr>
+    <tr>
+      <td>932</td>
+      <td>UTF-8</td>
+      <td>UTF-8</td>
+      <td>932 -&gt; wide -&gt; UTF-8</td>
+    </tr>
+    <tr>
+      <td>932</td>
+      <td>932</td>
+      <td>932</td>
+      <td>932 -&gt; wide -&gt; 932</td>
+    </tr>
+    <tr>
+      <td>932</td>
+      <td>936</td>
+      <td>936</td>
+      <td>932 -&gt; wide -&gt; 936</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><a name="vc6-localeName"></a></p>
+<h3 id="update-for-vc60-the-key-is-localename">UPDATE: For VC6.0, the key is LocaleName.</h3>
+
+<p>Say no more, I am totally speechless now. As long as your <code class="language-plaintext highlighter-rouge">LocaleName</code> is valid and start with <code class="language-plaintext highlighter-rouge">en-</code>, it will compile without issue. I’m not sure why (racist?) but it works. See for yourself.</p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-japan-locale-name.png" alt="img" /></p>
+
+<p><img src="/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-us-locale-name.png" alt="img" /></p>
+
+<p>Good thing is, this change <strong>does not require a reboot</strong>, and you can automate it with batch file. I have wrapped as a function, so you can integrate it into your batch file easily. Note that you need to <code class="language-plaintext highlighter-rouge">setlocal enableDelayedExpansion</code>. Don’t know where to put? Put it after your <code class="language-plaintext highlighter-rouge">@echo off</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>:localeName
+set _path_="HKCU\Control Panel\International"
+set _name_=LocaleName
+if "%~1"=="patch" (
+	call :localeName get _localeName_
+	call :localeName set en-US
+)
+if "%~1"=="unpatch" (
+	call :localeName set !_localeName_!
+)
+if "%~1"=="get" (
+	for /f "tokens=3 skip=2" %%i in ('reg query !_path_! /v !_name_!') do (
+		set _localeName_=%%i
+	)
+)
+if "%~1"=="set" (
+	reg add !_path_! /v !_name_! /d "%~2" /f &gt;nul || exit/b 1
+)
+exit/b
+</code></pre></div></div>
+
+<p>Before compile script: <code class="language-plaintext highlighter-rouge">call :localeName patch</code></p>
+
+<p>After compile script: <code class="language-plaintext highlighter-rouge">call :localeName unpatch</code></p>
+
+  </div><a class="u-url" href="/myblog/msvc-support-utf8-string-literal-since-vc6" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/myblog/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">myblog - raymai97</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">myblog - raymai97</li><li><a class="u-email" href="mailto:cheeboonray@gmail.com">cheeboonray@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/raymai97"><svg class="svg-icon"><use xlink:href="/myblog/assets/minima-social-icons.svg#github"></use></svg> <span class="username">raymai97</span></a></li><li><a href="https://www.twitter.com/raymai97"><svg class="svg-icon"><use xlink:href="/myblog/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">raymai97</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

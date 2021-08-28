@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raymai97.github.io/myblog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raymai97.github.io/myblog/" rel="alternate" type="text/html" /><updated>2021-08-29T02:52:54+08:00</updated><id>https://raymai97.github.io/myblog/feed.xml</id><title type="html">myblog - raymai97</title><subtitle>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
+</subtitle><entry><title type="html">Visual C++ supports UTF-8 string literal since VC6.0 (Updated)</title><link href="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6" rel="alternate" type="text/html" title="Visual C++ supports UTF-8 string literal since VC6.0 (Updated)" /><published>2017-05-04T21:00:00+08:00</published><updated>2017-05-04T21:00:00+08:00</updated><id>https://raymai97.github.io/myblog/msvc-support-utf-8-string-literal-since-vc6</id><content type="html" xml:base="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6">&lt;p&gt;If you’re here for Visual C++ 6.0, &lt;a href=&quot;#vc6&quot;&gt;click here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I’m not sure about Visual C++ 7.0 and 7.1 (.NET 2002 and 2003), but since 8.0 (2005), Visual C++ compiler already supports  source file with UTF-8 no BOM encoding. It is just that, for it to work as expected, you need to follow a rule that no one in Microsoft will ever tell you. Now we are in 2017 and I have failed to find any thread or article that emphasizes it, that’s why I think I need to write this.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/screenshot.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is the test source file we will use today: &lt;a href=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/utf8-string-literal-test.cpp&quot;&gt;utf8-string-literal-test.cpp&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;for-visual-c-80-and-above&quot;&gt;For Visual C++ 8.0 and above&lt;/h3&gt;
+
+&lt;p&gt;To get your UTF-8 source files compiled correctly, you must save in &lt;strong&gt;UTF-8 without BOM&lt;/strong&gt; encoding, and the &lt;strong&gt;system locale (non-Unicode language) must be English.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/ansi-must-be-english.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I know this looks like bullshit and a bit racist, but that is what my test result tells me.&lt;/p&gt;
+
+&lt;p&gt;Here is what I get if I compile this file when my system locale is set to Japanese:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/japanese-locale-vc8.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;See? If the source file doesn’t contain BOM (byte-order mark), and your system locale is not English, VC will assume that your source file is not in Unicode. &lt;em&gt;What a &lt;strong&gt;bold&lt;/strong&gt; assumption.&lt;/em&gt; I think this is yet another compatibility trick by Microsoft. If you are sure your source file always use UTF-8 without BOM, you may mod the compiler so it stops making such assumption.&lt;/p&gt;
+
+&lt;h3 id=&quot;mod-the-compiler-for-visual-c-80-and-above-only&quot;&gt;Mod the compiler (for Visual C++ 8.0 and above only)&lt;/h3&gt;
+
+&lt;p&gt;I don’t like the idea of changing system locale, so I mod the compiler instead. This is how it looks like after I have modded my compiler:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/japanese-locale-vc8-modded.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Before you proceed, you should know that it is always a good idea to backup your compiler files. Better safe than sorry, right?&lt;/p&gt;
+
+&lt;h4 id=&quot;step-1-determine-what-to-mod&quot;&gt;Step 1: Determine what to mod&lt;/h4&gt;
+
+&lt;p&gt;Since this is related with character set, I &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grep&lt;/code&gt; for related API such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WideCharToMultiByte&lt;/code&gt;, then I choose a few files I think I needed to mod. For this example, I choose &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cl.exe&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;c1.dll&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;c1xx.dll&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;c2.dll&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/grep-widechartomultibyte.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;step-2-mod-the-files-to-load-kernel31-instead&quot;&gt;Step 2: Mod the files to load &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31&lt;/code&gt; instead&lt;/h4&gt;
+
+&lt;p&gt;Open the file in hex editor. Search for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt; string and replace it with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; string. If there are multiple occurences, choose the one that is surrounded by many API names.&lt;/p&gt;
+
+&lt;h4 id=&quot;step-3-assert-codepage-1252-in-your-kernel31&quot;&gt;Step 3: Assert codepage 1252 in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31&lt;/code&gt;&lt;/h4&gt;
+
+&lt;p&gt;If you don’t know &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31&lt;/code&gt;, please look forward to a future post I will write someday.&lt;/p&gt;
+
+&lt;p&gt;In your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31&lt;/code&gt; project, you need to redirect two functions to your own implementation, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MultiByteToWideChar&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WideCharToMultiByte&lt;/code&gt;. The idea is, if the incoming codepage is not &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CP_UTF8&lt;/code&gt;, change it to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1252&lt;/code&gt; (English codepage), and then return &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MultiByteToWideChar&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WideCharToMultiByte&lt;/code&gt;. This is how I coded it:&lt;/p&gt;
+
+&lt;div class=&quot;language-c++ highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;KERNEL31_API&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__stdcall&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;My_MultiByteToWideChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;UINT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DWORD&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dwFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cbMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;LPWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cchWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CP_UTF8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1252&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MultiByteToWideChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dwFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cbMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;szWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cchWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;KERNEL31_API&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__stdcall&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;My_WideCharToMultiByte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;UINT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DWORD&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dwFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cchWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;LPSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cbMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpDefChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPBOOL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpUsedDefChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CP_UTF8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1252&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WideCharToMultiByte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dwFlags&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;szWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cchWide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;szMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cbMulti&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpDefChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpUsedDefChar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you prefer to download the one I created instead:&lt;br /&gt;
+&lt;a href=&quot;Kernel31-vc8.7z&quot;&gt;Kernel31 for VC8.0 (VC2005)&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;Kernel31-vc14.7z&quot;&gt;Kernel31 for VC14.0 (VC2015)&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;step-4-showtime&quot;&gt;Step 4: Showtime&lt;/h4&gt;
+
+&lt;p&gt;Just put the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; into the compiler directory, and you’re done.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc8-dir-after-mod.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Congraz! Now your VC can compile UTF-8 source file without BOM! No more crappy BOM or UTF-16!&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;vc6&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;for-visual-c-60&quot;&gt;For Visual C++ 6.0&lt;/h3&gt;
+
+&lt;p&gt;Let me make one thing clear, &lt;strong&gt;the IDE of Visual C++ 6.0 itself doesn’t know anything about Unicode.&lt;/strong&gt; The moment you open your UTF-8 source file in the IDE, you’re doomed. You &lt;strong&gt;must use command-line to compile such thing with VC6.0&lt;/strong&gt;. In fact, the compiler doesn’t know Unicode too, but because &lt;strong&gt;UTF-8 is a multi-byte character set&lt;/strong&gt;, it happens to support such encoding too, with a little bit issue of course.&lt;/p&gt;
+
+&lt;p&gt;Let’s see what would happen if we compile the source file with VC6.0 compiler.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This is the issue I was talking about. To fix it, just append a space to the problematic string literal.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;UPDATE May 11: &lt;a href=&quot;#vc6-localeName&quot;&gt;A better way has been discovered&lt;/a&gt;.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-fixed.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;信じられない？ See for yourself:&lt;br /&gt;
+&lt;a href=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/utf8-string-literal-test-vc6-exe.7z&quot;&gt;utf8-string-literal-test-vc6-exe.7z&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;update-file-encoding-plays-role-too&quot;&gt;UPDATE: File encoding plays role too&lt;/h3&gt;
+
+&lt;p&gt;You might think that as long as your system locale is English, which enable MSVC to compile UTF-8 source file, the string literal in your source file will always be UTF-8. This is NOT true. Here is the pseudocode that describes the MSVC behavior:&lt;/p&gt;
+
+&lt;div class=&quot;language-c++ highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ansi_codepage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1252&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;open_source_file_with_encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;utf_8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;open_source_file_with_encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ansi_codepage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;copy_string_literal_into_exe_with_encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;ANSI CP&lt;/th&gt;
+      &lt;th&gt;Source file CP&lt;/th&gt;
+      &lt;th&gt;String literal CP in EXE&lt;/th&gt;
+      &lt;th&gt;Conversion flow&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1252&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;UTF-8 -&amp;gt; wide -&amp;gt; UTF-8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1252&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;UTF-8 -&amp;gt; wide -&amp;gt; 932&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1252&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;UTF-8 -&amp;gt; wide-&amp;gt; 936&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;936 -&amp;gt; wide -&amp;gt; UTF8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;936 -&amp;gt; wide -&amp;gt; 932&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;936 -&amp;gt; wide -&amp;gt; 936&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;UTF-8&lt;/td&gt;
+      &lt;td&gt;932 -&amp;gt; wide -&amp;gt; UTF-8&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;932 -&amp;gt; wide -&amp;gt; 932&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;932&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;936&lt;/td&gt;
+      &lt;td&gt;932 -&amp;gt; wide -&amp;gt; 936&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;a name=&quot;vc6-localeName&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;update-for-vc60-the-key-is-localename&quot;&gt;UPDATE: For VC6.0, the key is LocaleName.&lt;/h3&gt;
+
+&lt;p&gt;Say no more, I am totally speechless now. As long as your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;LocaleName&lt;/code&gt; is valid and start with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;en-&lt;/code&gt;, it will compile without issue. I’m not sure why (racist?) but it works. See for yourself.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-japan-locale-name.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/msvc-support-utf-8-string-literal-since-vc6/vc6-us-locale-name.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Good thing is, this change &lt;strong&gt;does not require a reboot&lt;/strong&gt;, and you can automate it with batch file. I have wrapped as a function, so you can integrate it into your batch file easily. Note that you need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setlocal enableDelayedExpansion&lt;/code&gt;. Don’t know where to put? Put it after your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@echo off&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;:localeName
+set _path_=&quot;HKCU\Control Panel\International&quot;
+set _name_=LocaleName
+if &quot;%~1&quot;==&quot;patch&quot; (
+	call :localeName get _localeName_
+	call :localeName set en-US
+)
+if &quot;%~1&quot;==&quot;unpatch&quot; (
+	call :localeName set !_localeName_!
+)
+if &quot;%~1&quot;==&quot;get&quot; (
+	for /f &quot;tokens=3 skip=2&quot; %%i in (&apos;reg query !_path_! /v !_name_!&apos;) do (
+		set _localeName_=%%i
+	)
+)
+if &quot;%~1&quot;==&quot;set&quot; (
+	reg add !_path_! /v !_name_! /d &quot;%~2&quot; /f &amp;gt;nul || exit/b 1
+)
+exit/b
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Before compile script: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;call :localeName patch&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;After compile script: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;call :localeName unpatch&lt;/code&gt;&lt;/p&gt;</content><author><name></name></author><category term="msvc" /><summary type="html">If you’re here for Visual C++ 6.0, click here.</summary></entry><entry><title type="html">Subsystem version and WS_THICKFRAME are related somehow</title><link href="https://raymai97.github.io/myblog/subsystem-version-and-ws-thickframe" rel="alternate" type="text/html" title="Subsystem version and WS_THICKFRAME are related somehow" /><published>2017-05-03T23:00:00+08:00</published><updated>2017-05-03T23:00:00+08:00</updated><id>https://raymai97.github.io/myblog/subsystem-version-and-ws-thickframe</id><content type="html" xml:base="https://raymai97.github.io/myblog/subsystem-version-and-ws-thickframe">&lt;blockquote&gt;
+  &lt;p&gt;I always thought it was just an intended change made by the WinForm development team. I was wrong.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Since Visual Studio 2012, the WinForm designer uses thick window frame even if the form border style is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FixedSingle&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/vs2015-designer-fixedsingle.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This is how thing was looked like back in the older version of Visual Studio.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/vs2008-designer-fixedsingle.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Do you ever wonder why? Here’s the answer:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Because since 2012, Visual Studio requires NT6.0 (Windows Vista) to run.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;What?&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;To be more precise, it is because the subsystem version of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;devenv.exe&lt;/code&gt; is set to 6.0.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;what-is-subsystem-version&quot;&gt;What is subsystem version?&lt;/h3&gt;
+
+&lt;p&gt;Inside every EXE file, there is a &lt;strong&gt;PE header&lt;/strong&gt; which provides various information about the file. For example, it will tell if the EXE file is designed for x86, IA64 or AMD64 processor. There is a field that tells if the EXE file should be started with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Console&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Windows&lt;/code&gt; subsystem, and it also contains the &lt;strong&gt;minimum Windows version required to run the EXE.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This explains that why sometimes you don’t even have a chance to run a certain program, if your OS version is quite old.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/win2k-cant-run-sdelete.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;and-ws_thickframe-would-be&quot;&gt;And WS_THICKFRAME would be…?&lt;/h3&gt;
+
+&lt;p&gt;In simple word, it is a window style that determines if the window can be resized or not. In the old days where DWM is not enabled, resizable window has thicker window border than unresizable window, hence the name.&lt;/p&gt;
+
+&lt;h3 id=&quot;arent-they-totally-unrelated&quot;&gt;Aren’t they totally unrelated?&lt;/h3&gt;
+
+&lt;p&gt;I had the same thought too, until this happened to me.&lt;/p&gt;
+
+&lt;p&gt;I was developing a Win32 GUI framework. During debugging, I found an inconsistent behavior between the build that compiled using MSVC2005 and MSVC2015. The test subject was toggling the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Resizable&lt;/code&gt; (which toggle the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WS_THICKFRAME&lt;/code&gt;). In MSVC2015 build, the client size remained the same. In MSVC2005 build, &lt;strong&gt;the client size changed&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;So I tried to pinpoint the root cause of problem. With debugger, I found the problem was occured at a line of code. The code would call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SetWindowLong&lt;/code&gt; the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GWL_STYLE&lt;/code&gt; to enable or disable the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WS_THICKFRAME&lt;/code&gt; window style. So I coded &lt;a href=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/test.cpp&quot;&gt;a minimal Win32 C++ GUI app&lt;/a&gt; just to see what would happen when I toggled the style.&lt;/p&gt;
+
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/test.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+
+&lt;p&gt;WTF? Fine, I changed my mind, I wanted to run the EXE in my Windows XP guest and see what would happen. &lt;strong&gt;I used the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;editbin&lt;/code&gt; to modify the subsystem version number.&lt;/strong&gt; (For the record, I never install Windows XP targeting toolset because I don’t want to.)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/sendto-editbin.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I ran the program again, and after I toggled the style, &lt;strong&gt;the client size changed.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Wait. Visual Studio 2010 is the last version that runs on Windows XP, while Visual Studio 2012 is the first version that starts to use thick window frame for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FixedSingle&lt;/code&gt;. They were connected, weren’t they?!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I got it now! I always thought it was just an intended change made by the WinForm development team. I was wrong.&lt;/p&gt;
+
+&lt;h3 id=&quot;lets-prove-with-proof&quot;&gt;Let’s prove with proof&lt;/h3&gt;
+
+&lt;p&gt;First, a WinForm application that toggles &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FixedSingle&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Sizable&lt;/code&gt; form border style. Test the program &lt;strong&gt;before and after changing subsystem version to 6.0&lt;/strong&gt; with a batch file that calls &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;editbin&lt;/code&gt;. &lt;a href=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/set-vista-as-min-winver.cmd&quot;&gt;set-vista-as-min-winver.cmd&lt;/a&gt;&lt;/p&gt;
+
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/proof-winform.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+
+&lt;p&gt;&lt;a name=&quot;winform-workaround&quot;&gt;&lt;/a&gt;
+Well, the client size doesn’t change, but you can see that something is off. I guess WinForm has workaround like&lt;/p&gt;
+&lt;div class=&quot;language-c++ highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ToggleResizable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GetClientSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;RealToggleResizable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;SetClientSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, let’s try this trick on Visual Studio 2015. I modify the subsystem version of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;devenv.exe&lt;/code&gt;, and see if anything changes.&lt;/p&gt;
+
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/proof-vs2015.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+
+&lt;p&gt;See? With just a change of a byte, we can get back the good-old thin window border in Form Designer again.&lt;/p&gt;
+
+&lt;h3 id=&quot;your-window-theme-does-matter-too&quot;&gt;Your window theme does matter too&lt;/h3&gt;
+
+&lt;h4 id=&quot;for-win32-c&quot;&gt;For Win32 C++&lt;/h4&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;usingClassicTheme&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subsystem_ver&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ASSERT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;client_size_will_change&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;v5.0:&lt;/p&gt;
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/test-v5.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+&lt;p&gt;v6.0:&lt;/p&gt;
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/test-v6.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+&lt;p&gt;&lt;a href=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/test-v5-v6.7z&quot;&gt;test-v5-v6.7z&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;for-winform&quot;&gt;For WinForm&lt;/h4&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;ASSERT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;client_size_never_change&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// but&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subsystem_ver&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;// you can see something is off&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;// because it is WinForm&apos;s workaround after all&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;v5.0:&lt;/p&gt;
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/winform-v5.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+&lt;p&gt;&lt;br /&gt;
+v6.0:&lt;/p&gt;
+&lt;video controls=&quot;&quot;&gt;&lt;source src=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/winform-v6.mp4&quot; type=&quot;video/mp4&quot; /&gt;&lt;/video&gt;
+&lt;p&gt;&lt;a href=&quot;/myblog/assets/posts/subsystem-version-and-ws-thickframe/winform-v5-v6.7z&quot;&gt;winform-v5-v6.7z&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;If you’re developing with WinForm, then good for you, you don’t actually have to do anything, because you can assume the client size never change by itself. That little oddity is not really a big matter. Who would toggle the window style every two seconds?&lt;/p&gt;
+
+&lt;p&gt;If you’re developing Win32 application, then you have to make up your mind. Set subsystem version to 6.0 is probably the most easy thing to do, but it is not consistent enough IMO because the size still changes if user is using Windows Classic theme. You might want to use the &lt;a href=&quot;#winform-workaround&quot;&gt;WinForm workaround I proposed&lt;/a&gt; up there. If you really want the ultimate consistency (like me), then you should never toggle the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WS_THICKFRAME&lt;/code&gt;. There are other ways to prevent the window from resizing, I will leave that to you.&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">I always thought it was just an intended change made by the WinForm development team. I was wrong.</summary></entry><entry><title type="html">Enable Direct3D acceleration in Windows 2000 in VirtualBox</title><link href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" rel="alternate" type="text/html" title="Enable Direct3D acceleration in Windows 2000 in VirtualBox" /><published>2017-05-03T15:34:00+08:00</published><updated>2017-05-03T15:34:00+08:00</updated><id>https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox">&lt;p&gt;VBox version: v5.0.10.r104061&lt;/p&gt;
+
+&lt;h2 id=&quot;part-1-obtaining-required-files&quot;&gt;Part 1: Obtaining required files&lt;/h2&gt;
+
+&lt;p&gt;First, you must need to obtain these files:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;d3d8.dll&lt;/li&gt;
+  &lt;li&gt;d3d9.dll&lt;/li&gt;
+  &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
+  &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
+  &lt;li&gt;wined3d.dll&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I get these files from my Windows XP guest OS, with Direct3D acceleration enabled.&lt;/p&gt;
+
+&lt;h2 id=&quot;part-2-mod-the-files-to-load-kernel31dll-instead&quot;&gt;Part 2: Mod the files to load kernel31.dll instead&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Win2K doesn’t support new APIs introduced in WinXP. In this case, all of these APIs are in kernel32.dll. We need a DLL, say, kernel31.dll, which will forward most of the calls to the real kernel32.dll. For “new” APIs, we will provide implementation by ourselves. Creating such DLL requires some programming knowledge. If you know how to create DLL that exports function, then you may refer Part X. Otherwise, you might just want to &lt;a href=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z&quot;&gt;download the kernel31.dll here&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To do this, you need a hex editor. I recommended &lt;a href=&quot;https://mh-nexus.de/en/hxd/&quot;&gt;HxD&lt;/a&gt; as it is free, small and serves the purpose well.&lt;/p&gt;
+
+&lt;p&gt;You need to mod the following files:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
+  &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
+  &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
+  &lt;li&gt;wined3d.dll&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;to-mod-a-file&quot;&gt;To mod a file:&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;Open the file with hex editor.&lt;/li&gt;
+  &lt;li&gt;Search (Ctrl+F) for text-string &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;br /&gt;
+Be careful. Sometimes there are more than one occurence in a file.
+    &lt;ul&gt;
+      &lt;li&gt;This is the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt; we are looking for:
+  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/true-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+      &lt;li&gt;This is &lt;strong&gt;NOT&lt;/strong&gt; the one we are looking for:&lt;br /&gt;
+  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/false-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Overwrite so it become &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; and save the file.&lt;br /&gt;
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/overwrite-like-this.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;part-3-showtime&quot;&gt;Part 3: Showtime&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;If you haven’t install Win2K as guest OS yet, do it now.
+    &lt;ul&gt;
+      &lt;li&gt;Install VirtualBox Guest Addition as usual.&lt;/li&gt;
+      &lt;li&gt;No need to tick Direct3D support.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Go to Machine &amp;gt; Settings &amp;gt; Display
+    &lt;ul&gt;
+      &lt;li&gt;Tick “Enable 3D Acceleration”&lt;/li&gt;
+      &lt;li&gt;Tick “Enable 2D Video Acceleration”&lt;/li&gt;
+      &lt;li&gt;Video Memory 128MB&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Copy and paste the following files into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\WINNT\System32&lt;/code&gt; in Win2K.&lt;br /&gt;
+Overwrite the file if prompted.
+    &lt;ul&gt;
+      &lt;li&gt;d3d8.dll&lt;/li&gt;
+      &lt;li&gt;d3d9.dll&lt;/li&gt;
+      &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
+      &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
+      &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
+      &lt;li&gt;wined3d.dll&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;(/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z)&quot;&gt;Kernel31.dll&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;4) Finally, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dxdiag&lt;/code&gt; to see if the Direct3D acceleration is working.&lt;br /&gt;
+It is expected to fail in Direct3D 7, but succeed in Direct3D 8 and 9 test.&lt;br /&gt;
+Here is a screenshot running Touhou games in Win2k VBox guest:&lt;br /&gt;
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/proof-running-touhou-rss.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;part-x-creating-the-kernel31dll&quot;&gt;Part X: Creating the Kernel31.dll&lt;/h2&gt;
+
+&lt;p&gt;When you read this, I assume you already know how to create a DLL and export C function, so I’m just going to key out some tips on creating the DLL.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;First, determine a list of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32&lt;/code&gt; APIs to be handled.&lt;/li&gt;
+  &lt;li&gt;You can use Dumpbin to find out what APIs are used by a DLL.&lt;/li&gt;
+  &lt;li&gt;You should handle all DLLs mentioned in Part 2.&lt;/li&gt;
+  &lt;li&gt;To forward API calls, write corresponding pragma to instruct the linker about it. For example, if the API name is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AddVectoredExceptionHandler&lt;/code&gt;, you write the pragma like this:
+    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel32.AddVectoredExceptionHandler&quot;)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;to forward the API call to the real &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;If you want to provide your own implementation, you forward the API call to your own exported function, with pragma like this:
+    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel31.My_AddVectoredExceptionHandler&quot;)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;And remember to export the function you specified. In this example, it is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;My_AddVectoredExceptionHandler&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Make sure you use .def file, or the exported symbol will be decorated and your DLL wouldn’t work.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/bad-example.png&quot; alt=&quot;img&quot; /&gt;
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/good-example.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">VBox version: v5.0.10.r104061</summary></entry></feed>
