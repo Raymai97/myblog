@@ -1,5 +1,155 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raymai97.github.io/myblog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raymai97.github.io/myblog/" rel="alternate" type="text/html" /><updated>2021-08-29T02:52:54+08:00</updated><id>https://raymai97.github.io/myblog/feed.xml</id><title type="html">myblog - raymai97</title><subtitle>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
-</subtitle><entry><title type="html">Visual C++ supports UTF-8 string literal since VC6.0 (Updated)</title><link href="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6" rel="alternate" type="text/html" title="Visual C++ supports UTF-8 string literal since VC6.0 (Updated)" /><published>2017-05-04T21:00:00+08:00</published><updated>2017-05-04T21:00:00+08:00</updated><id>https://raymai97.github.io/myblog/msvc-support-utf-8-string-literal-since-vc6</id><content type="html" xml:base="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6">&lt;p&gt;If you’re here for Visual C++ 6.0, &lt;a href=&quot;#vc6&quot;&gt;click here&lt;/a&gt;.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raymai97.github.io/myblog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raymai97.github.io/myblog/" rel="alternate" type="text/html" /><updated>2021-08-29T13:42:09+08:00</updated><id>https://raymai97.github.io/myblog/feed.xml</id><title type="html">myblog - raymai97</title><subtitle>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
+</subtitle><entry><title type="html">Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)</title><link href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" rel="alternate" type="text/html" title="Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)" /><published>2021-08-29T13:42:00+08:00</published><updated>2021-08-29T13:42:00+08:00</updated><id>https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox">&lt;p&gt;Yes, you read it right. This is done by backporting files for WinXP back to Win2000.&lt;/p&gt;
+
+&lt;p&gt;I have tested this on VirtualBox versions below:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;v5.0.10.r104061 (… in 2017, &lt;a href=&quot;https://raymai97.github.io/myblog_archived/enable-direct3d-in-win2k-vbox&quot;&gt;see archived post here&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;v5.2.44.r139111 (Thanks to Nicolas for prompting me to update this)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;part-0-a-few-notes&quot;&gt;Part 0: A few notes&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Win2000 refers to “Windows 2000 Professional with SP4”. I didn’t test on earlier version of Win2000.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;WinXP refers to “32-bit Windows XP Professional with SP3”. I didn’t test on earlier version of WinXP.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The WinXP installation must be &lt;strong&gt;a guest OS in VirtualBox with working Direct3D acceleration&lt;/strong&gt;. It would not work if your VirtualBox version does not support Direct3D acceleration for WinXP guest OS.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;part-1-copy-related-dll-files&quot;&gt;Part 1: Copy related DLL files&lt;/h2&gt;
+
+&lt;p&gt;First, you need to copy related DLL files from WinXP guest OS.&lt;/p&gt;
+
+&lt;p&gt;For v5.0.10.r104061, they are&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;- d3d8.dll
+- d3d9.dll
+- VBoxD3D8.dll
+- VBoxD3D9.dll
+- VBoxOGL.dll
+- VBoxOGLarrayspu.dll
+- VBoxOGLcrutil.dll
+- VBoxOGLerrorspu.dll
+- VBoxOGLfeedbackspu.dll
+- VBoxOGLpackspu.dll
+- VBoxOGLpassthroughspu.dll
+- wined3d.dll
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For v5.2.44.r139111, they are&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;- d3d8.dll
+- d3d9.dll
+- VBoxD3D8.dll
+- VBoxD3D9.dll
+- VBoxOGL.dll
+- wined3d.dll
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;part-2-mod-related-dll-files-to-load-kernel31dll-instead&quot;&gt;Part 2: Mod related DLL files to load kernel31.dll instead&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Some &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32&lt;/code&gt; APIs required by these DLL files are only present on WinXP.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;To make them work on Win2000, we need to mod them to load alternative DLL instead, which I named as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt;. It forwards most API calls to the real &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;, and provides stub for APIs that are not supported by Win2000.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;If you are interested in creating such DLL by yourself, you may refer Part X. Otherwise, please refer text below.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;download-kernel31dll-to-win2000-guest-cwinntsystem32&quot;&gt;Download &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; to Win2000 guest &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\WINNT\System32&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;For v5.0.10.r104061, please &lt;a href=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z&quot;&gt;use this&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For v5.2.44.r139111, please &lt;a href=&quot;https://github.com/Raymai97/vbox-d3d-on-w2k/releases/download/20210825.1/kernel31.zip&quot;&gt;use this&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;mod-dll-file&quot;&gt;Mod DLL file&lt;/h3&gt;
+
+&lt;p&gt;To mod DLL file, you need a hex editor. I recommend &lt;a href=&quot;https://mh-nexus.de/en/hxd/&quot;&gt;HxD&lt;/a&gt; as it is free, small and serves the purpose well.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open the file with hex editor.&lt;/li&gt;
+  &lt;li&gt;Search (Ctrl+F) for text-string &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;br /&gt;
+Be careful. Sometimes there are more than one occurence in a file.
+    &lt;ul&gt;
+      &lt;li&gt;This is the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt; we are looking for:
+  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/true-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+      &lt;li&gt;This is &lt;strong&gt;NOT&lt;/strong&gt; the one we are looking for:&lt;br /&gt;
+  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/false-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Overwrite so it become &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; and save the file.&lt;br /&gt;
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/overwrite-like-this.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;part-3-configure-your-win2000-guest-os&quot;&gt;Part 3: Configure your Win2000 guest OS&lt;/h2&gt;
+
+&lt;p&gt;Checklist:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Install VirtualBox Guest Addition as usual.&lt;br /&gt;
+No need to tick “Direct3D Support”.&lt;/li&gt;
+  &lt;li&gt;Install DirectX 9.0 redist.&lt;br /&gt;
+If you hit issue, try older version such as “DirectX 9.0c (Dec 2006)”.&lt;/li&gt;
+  &lt;li&gt;Copy the related DLL files to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\WINNT\System32&lt;/code&gt;.&lt;br /&gt;
+You may want to backup the original files to somewhere before overwriting them.&lt;/li&gt;
+  &lt;li&gt;Open your guest OS settings, go to Display and
+    &lt;ul&gt;
+      &lt;li&gt;Tick “Enable 3D Acceleration”&lt;/li&gt;
+      &lt;li&gt;Set video memory to 128MB
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/vm-cfg-enable-d3d.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dxdiag&lt;/code&gt; to see if the Direct3D acceleration is working.&lt;br /&gt;
+It is expected to fail in Direct3D 7, but succeed in Direct3D 8 and 9 test.&lt;/p&gt;
+
+&lt;p&gt;Here is the result:
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/result.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;part-x-creating-the-kernel31dll&quot;&gt;Part X: Creating the Kernel31.dll&lt;/h2&gt;
+
+&lt;p&gt;If you read this, I assume you already know how to create a DLL and export C functions. Here I’m just going to list out the important points. For complete source code, please refer to my &lt;a href=&quot;https://github.com/Raymai97/vbox-d3d-on-w2k&quot;&gt;repo&lt;/a&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;First, find out what &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32&lt;/code&gt; APIs are needed by the related DLLs.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Then, find out what &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32&lt;/code&gt; APIs are already available in Win2000.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;For APIs that are already available in Win2000, you just need to forward API calls.&lt;br /&gt;
+To forward API calls, use pragma to instruct the linker to do so.&lt;br /&gt;
+For example, if the API name is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AddVectoredExceptionHandler&lt;/code&gt;, you write the pragma like this:
+    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel32.AddVectoredExceptionHandler&quot;)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;to forward the API call to the real &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;For APIs that are required but not available in Win2000, you need to write the function yourself.&lt;br /&gt;
+Then, forward the API call to your own exported function, with pragma like this:
+    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel31.My_AddVectoredExceptionHandler&quot;)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;And remember to export the function you specified. In this example, it is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;My_AddVectoredExceptionHandler&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Make sure you use .def file, or the exported symbol will be decorated and your DLL wouldn’t work.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/bad-example.png&quot; alt=&quot;img&quot; /&gt;
+&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/good-example.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Pro Tips:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;To build a lean DLL for Win2000, try older MSVC such as “Visual C++ 5.0”.&lt;/li&gt;
+  &lt;li&gt;Use Dumpbin to get the EXPORTS and IMPORTS of DLL.&lt;br /&gt;
+IMPORTS let you know what APIs are needed by a DLL.&lt;br /&gt;
+EXPORTS let you know what APIs are provided by a DLL.&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">Yes, you read it right. This is done by backporting files for WinXP back to Win2000.</summary></entry><entry><title type="html">Visual C++ supports UTF-8 string literal since VC6.0 (Updated)</title><link href="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6" rel="alternate" type="text/html" title="Visual C++ supports UTF-8 string literal since VC6.0 (Updated)" /><published>2017-05-04T21:00:00+08:00</published><updated>2017-05-04T21:00:00+08:00</updated><id>https://raymai97.github.io/myblog/msvc-support-utf-8-string-literal-since-vc6</id><content type="html" xml:base="https://raymai97.github.io/myblog/msvc-support-utf8-string-literal-since-vc6">&lt;p&gt;If you’re here for Visual C++ 6.0, &lt;a href=&quot;#vc6&quot;&gt;click here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;I’m not sure about Visual C++ 7.0 and 7.1 (.NET 2002 and 2003), but since 8.0 (2005), Visual C++ compiler already supports  source file with UTF-8 no BOM encoding. It is just that, for it to work as expected, you need to follow a rule that no one in Microsoft will ever tell you. Now we are in 2017 and I have failed to find any thread or article that emphasizes it, that’s why I think I need to write this.&lt;/p&gt;
 
@@ -325,127 +475,4 @@ v6.0:&lt;/p&gt;
 
 &lt;p&gt;If you’re developing with WinForm, then good for you, you don’t actually have to do anything, because you can assume the client size never change by itself. That little oddity is not really a big matter. Who would toggle the window style every two seconds?&lt;/p&gt;
 
-&lt;p&gt;If you’re developing Win32 application, then you have to make up your mind. Set subsystem version to 6.0 is probably the most easy thing to do, but it is not consistent enough IMO because the size still changes if user is using Windows Classic theme. You might want to use the &lt;a href=&quot;#winform-workaround&quot;&gt;WinForm workaround I proposed&lt;/a&gt; up there. If you really want the ultimate consistency (like me), then you should never toggle the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WS_THICKFRAME&lt;/code&gt;. There are other ways to prevent the window from resizing, I will leave that to you.&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">I always thought it was just an intended change made by the WinForm development team. I was wrong.</summary></entry><entry><title type="html">Enable Direct3D acceleration in Windows 2000 in VirtualBox</title><link href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" rel="alternate" type="text/html" title="Enable Direct3D acceleration in Windows 2000 in VirtualBox" /><published>2017-05-03T15:34:00+08:00</published><updated>2017-05-03T15:34:00+08:00</updated><id>https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox">&lt;p&gt;VBox version: v5.0.10.r104061&lt;/p&gt;
-
-&lt;h2 id=&quot;part-1-obtaining-required-files&quot;&gt;Part 1: Obtaining required files&lt;/h2&gt;
-
-&lt;p&gt;First, you must need to obtain these files:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;d3d8.dll&lt;/li&gt;
-  &lt;li&gt;d3d9.dll&lt;/li&gt;
-  &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
-  &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
-  &lt;li&gt;wined3d.dll&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I get these files from my Windows XP guest OS, with Direct3D acceleration enabled.&lt;/p&gt;
-
-&lt;h2 id=&quot;part-2-mod-the-files-to-load-kernel31dll-instead&quot;&gt;Part 2: Mod the files to load kernel31.dll instead&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Win2K doesn’t support new APIs introduced in WinXP. In this case, all of these APIs are in kernel32.dll. We need a DLL, say, kernel31.dll, which will forward most of the calls to the real kernel32.dll. For “new” APIs, we will provide implementation by ourselves. Creating such DLL requires some programming knowledge. If you know how to create DLL that exports function, then you may refer Part X. Otherwise, you might just want to &lt;a href=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z&quot;&gt;download the kernel31.dll here&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;To do this, you need a hex editor. I recommended &lt;a href=&quot;https://mh-nexus.de/en/hxd/&quot;&gt;HxD&lt;/a&gt; as it is free, small and serves the purpose well.&lt;/p&gt;
-
-&lt;p&gt;You need to mod the following files:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
-  &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
-  &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
-  &lt;li&gt;wined3d.dll&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;to-mod-a-file&quot;&gt;To mod a file:&lt;/h3&gt;
-&lt;ol&gt;
-  &lt;li&gt;Open the file with hex editor.&lt;/li&gt;
-  &lt;li&gt;Search (Ctrl+F) for text-string &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;br /&gt;
-Be careful. Sometimes there are more than one occurence in a file.
-    &lt;ul&gt;
-      &lt;li&gt;This is the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt; we are looking for:
-  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/true-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
-      &lt;li&gt;This is &lt;strong&gt;NOT&lt;/strong&gt; the one we are looking for:&lt;br /&gt;
-  &lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/false-kernel32-string.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Overwrite so it become &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel31.dll&lt;/code&gt; and save the file.&lt;br /&gt;
-&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/overwrite-like-this.png&quot; alt=&quot;img&quot; /&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;part-3-showtime&quot;&gt;Part 3: Showtime&lt;/h2&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;If you haven’t install Win2K as guest OS yet, do it now.
-    &lt;ul&gt;
-      &lt;li&gt;Install VirtualBox Guest Addition as usual.&lt;/li&gt;
-      &lt;li&gt;No need to tick Direct3D support.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Go to Machine &amp;gt; Settings &amp;gt; Display
-    &lt;ul&gt;
-      &lt;li&gt;Tick “Enable 3D Acceleration”&lt;/li&gt;
-      &lt;li&gt;Tick “Enable 2D Video Acceleration”&lt;/li&gt;
-      &lt;li&gt;Video Memory 128MB&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Copy and paste the following files into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\WINNT\System32&lt;/code&gt; in Win2K.&lt;br /&gt;
-Overwrite the file if prompted.
-    &lt;ul&gt;
-      &lt;li&gt;d3d8.dll&lt;/li&gt;
-      &lt;li&gt;d3d9.dll&lt;/li&gt;
-      &lt;li&gt;VBoxD3D8.dll&lt;/li&gt;
-      &lt;li&gt;VBoxD3D9.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGL.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLarrayspu.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLcrutil.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLerrorspu.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLfeedbackspu.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLpackspu.dll&lt;/li&gt;
-      &lt;li&gt;VBoxOGLpassthroughspu.dll&lt;/li&gt;
-      &lt;li&gt;wined3d.dll&lt;/li&gt;
-      &lt;li&gt;&lt;a href=&quot;(/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z)&quot;&gt;Kernel31.dll&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;4) Finally, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dxdiag&lt;/code&gt; to see if the Direct3D acceleration is working.&lt;br /&gt;
-It is expected to fail in Direct3D 7, but succeed in Direct3D 8 and 9 test.&lt;br /&gt;
-Here is a screenshot running Touhou games in Win2k VBox guest:&lt;br /&gt;
-&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/proof-running-touhou-rss.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;part-x-creating-the-kernel31dll&quot;&gt;Part X: Creating the Kernel31.dll&lt;/h2&gt;
-
-&lt;p&gt;When you read this, I assume you already know how to create a DLL and export C function, so I’m just going to key out some tips on creating the DLL.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;First, determine a list of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32&lt;/code&gt; APIs to be handled.&lt;/li&gt;
-  &lt;li&gt;You can use Dumpbin to find out what APIs are used by a DLL.&lt;/li&gt;
-  &lt;li&gt;You should handle all DLLs mentioned in Part 2.&lt;/li&gt;
-  &lt;li&gt;To forward API calls, write corresponding pragma to instruct the linker about it. For example, if the API name is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AddVectoredExceptionHandler&lt;/code&gt;, you write the pragma like this:
-    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel32.AddVectoredExceptionHandler&quot;)
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-    &lt;p&gt;to forward the API call to the real &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;If you want to provide your own implementation, you forward the API call to your own exported function, with pragma like this:
-    &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma comment(linker, &quot;/export:AddVectoredExceptionHandler=kernel31.My_AddVectoredExceptionHandler&quot;)
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-    &lt;p&gt;And remember to export the function you specified. In this example, it is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;My_AddVectoredExceptionHandler&lt;/code&gt;.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Make sure you use .def file, or the exported symbol will be decorated and your DLL wouldn’t work.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/bad-example.png&quot; alt=&quot;img&quot; /&gt;
-&lt;img src=&quot;/myblog/assets/posts/enable-direct3d-in-win2k-vbox/good-example.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">VBox version: v5.0.10.r104061</summary></entry></feed>
+&lt;p&gt;If you’re developing Win32 application, then you have to make up your mind. Set subsystem version to 6.0 is probably the most easy thing to do, but it is not consistent enough IMO because the size still changes if user is using Windows Classic theme. You might want to use the &lt;a href=&quot;#winform-workaround&quot;&gt;WinForm workaround I proposed&lt;/a&gt; up there. If you really want the ultimate consistency (like me), then you should never toggle the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WS_THICKFRAME&lt;/code&gt;. There are other ways to prevent the window from resizing, I will leave that to you.&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="undocd" /><summary type="html">I always thought it was just an intended change made by the WinForm development team. I was wrong.</summary></entry></feed>

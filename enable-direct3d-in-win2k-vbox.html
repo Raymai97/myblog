@@ -4,8 +4,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Enable Direct3D acceleration in Windows 2000 in VirtualBox</title>
-  <meta name="description" content="VBox version: v5.0.10.r104061">
+  <title>Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)</title>
+  <meta name="description" content="Yes, you read it right. This is done by backporting files for WinXP back to Win2000.">
 
   <link rel="stylesheet" href="/myblog/assets/main.css">
   <link rel="canonical" href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox">
@@ -14,21 +14,21 @@
   
   
   <!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Enable Direct3D acceleration in Windows 2000 in VirtualBox | myblog - raymai97</title>
+<title>Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated) | myblog - raymai97</title>
 <meta name="generator" content="Jekyll v4.2.0" />
-<meta property="og:title" content="Enable Direct3D acceleration in Windows 2000 in VirtualBox" />
+<meta property="og:title" content="Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="VBox version: v5.0.10.r104061" />
-<meta property="og:description" content="VBox version: v5.0.10.r104061" />
+<meta name="description" content="Yes, you read it right. This is done by backporting files for WinXP back to Win2000." />
+<meta property="og:description" content="Yes, you read it right. This is done by backporting files for WinXP back to Win2000." />
 <link rel="canonical" href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" />
 <meta property="og:url" content="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" />
 <meta property="og:site_name" content="myblog - raymai97" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2017-05-03T15:34:00+08:00" />
+<meta property="article:published_time" content="2021-08-29T13:42:00+08:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Enable Direct3D acceleration in Windows 2000 in VirtualBox" />
+<meta property="twitter:title" content="Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","headline":"Enable Direct3D acceleration in Windows 2000 in VirtualBox","dateModified":"2017-05-03T15:34:00+08:00","datePublished":"2017-05-03T15:34:00+08:00","description":"VBox version: v5.0.10.r104061","url":"https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox","mainEntityOfPage":{"@type":"WebPage","@id":"https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox"},"@context":"https://schema.org"}</script>
+{"@type":"BlogPosting","headline":"Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)","dateModified":"2021-08-29T13:42:00+08:00","datePublished":"2021-08-29T13:42:00+08:00","description":"Yes, you read it right. This is done by backporting files for WinXP back to Win2000.","url":"https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox","mainEntityOfPage":{"@type":"WebPage","@id":"https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -52,58 +52,87 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Enable Direct3D acceleration in Windows 2000 in VirtualBox</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)</h1>
     <p class="post-meta">
-      <time class="dt-published" datetime="2017-05-03T15:34:00+08:00" itemprop="datePublished">May 3, 2017
+      <time class="dt-published" datetime="2021-08-29T13:42:00+08:00" itemprop="datePublished">Aug 29, 2021
       </time></p>
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>VBox version: v5.0.10.r104061</p>
+    <p>Yes, you read it right. This is done by backporting files for WinXP back to Win2000.</p>
 
-<h2 id="part-1-obtaining-required-files">Part 1: Obtaining required files</h2>
-
-<p>First, you must need to obtain these files:</p>
+<p>I have tested this on VirtualBox versions below:</p>
 <ul>
-  <li>d3d8.dll</li>
-  <li>d3d9.dll</li>
-  <li>VBoxD3D8.dll</li>
-  <li>VBoxD3D9.dll</li>
-  <li>VBoxOGL.dll</li>
-  <li>VBoxOGLarrayspu.dll</li>
-  <li>VBoxOGLcrutil.dll</li>
-  <li>VBoxOGLerrorspu.dll</li>
-  <li>VBoxOGLfeedbackspu.dll</li>
-  <li>VBoxOGLpackspu.dll</li>
-  <li>VBoxOGLpassthroughspu.dll</li>
-  <li>wined3d.dll</li>
+  <li>v5.0.10.r104061 (… in 2017, <a href="https://raymai97.github.io/myblog_archived/enable-direct3d-in-win2k-vbox">see archived post here</a>)</li>
+  <li>v5.2.44.r139111 (Thanks to Nicolas for prompting me to update this)</li>
 </ul>
 
-<p>I get these files from my Windows XP guest OS, with Direct3D acceleration enabled.</p>
+<h2 id="part-0-a-few-notes">Part 0: A few notes</h2>
 
-<h2 id="part-2-mod-the-files-to-load-kernel31dll-instead">Part 2: Mod the files to load kernel31.dll instead</h2>
-
-<blockquote>
-  <p>Win2K doesn’t support new APIs introduced in WinXP. In this case, all of these APIs are in kernel32.dll. We need a DLL, say, kernel31.dll, which will forward most of the calls to the real kernel32.dll. For “new” APIs, we will provide implementation by ourselves. Creating such DLL requires some programming knowledge. If you know how to create DLL that exports function, then you may refer Part X. Otherwise, you might just want to <a href="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z">download the kernel31.dll here</a>.</p>
-</blockquote>
-
-<p>To do this, you need a hex editor. I recommended <a href="https://mh-nexus.de/en/hxd/">HxD</a> as it is free, small and serves the purpose well.</p>
-
-<p>You need to mod the following files:</p>
 <ul>
-  <li>VBoxD3D8.dll</li>
-  <li>VBoxD3D9.dll</li>
-  <li>VBoxOGL.dll</li>
-  <li>VBoxOGLarrayspu.dll</li>
-  <li>VBoxOGLcrutil.dll</li>
-  <li>VBoxOGLerrorspu.dll</li>
-  <li>VBoxOGLfeedbackspu.dll</li>
-  <li>VBoxOGLpackspu.dll</li>
-  <li>VBoxOGLpassthroughspu.dll</li>
-  <li>wined3d.dll</li>
+  <li>
+    <p>Win2000 refers to “Windows 2000 Professional with SP4”. I didn’t test on earlier version of Win2000.</p>
+  </li>
+  <li>
+    <p>WinXP refers to “32-bit Windows XP Professional with SP3”. I didn’t test on earlier version of WinXP.</p>
+  </li>
+  <li>
+    <p>The WinXP installation must be <strong>a guest OS in VirtualBox with working Direct3D acceleration</strong>. It would not work if your VirtualBox version does not support Direct3D acceleration for WinXP guest OS.</p>
+  </li>
 </ul>
 
-<h3 id="to-mod-a-file">To mod a file:</h3>
+<h2 id="part-1-copy-related-dll-files">Part 1: Copy related DLL files</h2>
+
+<p>First, you need to copy related DLL files from WinXP guest OS.</p>
+
+<p>For v5.0.10.r104061, they are</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- d3d8.dll
+- d3d9.dll
+- VBoxD3D8.dll
+- VBoxD3D9.dll
+- VBoxOGL.dll
+- VBoxOGLarrayspu.dll
+- VBoxOGLcrutil.dll
+- VBoxOGLerrorspu.dll
+- VBoxOGLfeedbackspu.dll
+- VBoxOGLpackspu.dll
+- VBoxOGLpassthroughspu.dll
+- wined3d.dll
+</code></pre></div></div>
+
+<p>For v5.2.44.r139111, they are</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- d3d8.dll
+- d3d9.dll
+- VBoxD3D8.dll
+- VBoxD3D9.dll
+- VBoxOGL.dll
+- wined3d.dll
+</code></pre></div></div>
+
+<h2 id="part-2-mod-related-dll-files-to-load-kernel31dll-instead">Part 2: Mod related DLL files to load kernel31.dll instead</h2>
+
+<ul>
+  <li>
+    <p>Some <code class="language-plaintext highlighter-rouge">kernel32</code> APIs required by these DLL files are only present on WinXP.</p>
+  </li>
+  <li>
+    <p>To make them work on Win2000, we need to mod them to load alternative DLL instead, which I named as <code class="language-plaintext highlighter-rouge">kernel31.dll</code>. It forwards most API calls to the real <code class="language-plaintext highlighter-rouge">kernel32.dll</code>, and provides stub for APIs that are not supported by Win2000.</p>
+  </li>
+  <li>
+    <p>If you are interested in creating such DLL by yourself, you may refer Part X. Otherwise, please refer text below.</p>
+  </li>
+</ul>
+
+<h3 id="download-kernel31dll-to-win2000-guest-cwinntsystem32">Download <code class="language-plaintext highlighter-rouge">kernel31.dll</code> to Win2000 guest <code class="language-plaintext highlighter-rouge">C:\WINNT\System32</code></h3>
+
+<p>For v5.0.10.r104061, please <a href="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z">use this</a>.</p>
+
+<p>For v5.2.44.r139111, please <a href="https://github.com/Raymai97/vbox-d3d-on-w2k/releases/download/20210825.1/kernel31.zip">use this</a>.</p>
+
+<h3 id="mod-dll-file">Mod DLL file</h3>
+
+<p>To mod DLL file, you need a hex editor. I recommend <a href="https://mh-nexus.de/en/hxd/">HxD</a> as it is free, small and serves the purpose well.</p>
+
 <ol>
   <li>Open the file with hex editor.</li>
   <li>Search (Ctrl+F) for text-string <code class="language-plaintext highlighter-rouge">kernel32.dll</code>.<br />
@@ -119,61 +148,51 @@ Be careful. Sometimes there are more than one occurence in a file.
 <img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/overwrite-like-this.png" alt="img" /></li>
 </ol>
 
-<h2 id="part-3-showtime">Part 3: Showtime</h2>
+<h2 id="part-3-configure-your-win2000-guest-os">Part 3: Configure your Win2000 guest OS</h2>
 
-<ol>
-  <li>If you haven’t install Win2K as guest OS yet, do it now.
-    <ul>
-      <li>Install VirtualBox Guest Addition as usual.</li>
-      <li>No need to tick Direct3D support.</li>
-    </ul>
-  </li>
-  <li>Go to Machine &gt; Settings &gt; Display
+<p>Checklist:</p>
+<ul>
+  <li>Install VirtualBox Guest Addition as usual.<br />
+No need to tick “Direct3D Support”.</li>
+  <li>Install DirectX 9.0 redist.<br />
+If you hit issue, try older version such as “DirectX 9.0c (Dec 2006)”.</li>
+  <li>Copy the related DLL files to <code class="language-plaintext highlighter-rouge">C:\WINNT\System32</code>.<br />
+You may want to backup the original files to somewhere before overwriting them.</li>
+  <li>Open your guest OS settings, go to Display and
     <ul>
       <li>Tick “Enable 3D Acceleration”</li>
-      <li>Tick “Enable 2D Video Acceleration”</li>
-      <li>Video Memory 128MB</li>
+      <li>Set video memory to 128MB
+<img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/vm-cfg-enable-d3d.png" alt="img" /></li>
     </ul>
   </li>
-  <li>Copy and paste the following files into <code class="language-plaintext highlighter-rouge">C:\WINNT\System32</code> in Win2K.<br />
-Overwrite the file if prompted.
-    <ul>
-      <li>d3d8.dll</li>
-      <li>d3d9.dll</li>
-      <li>VBoxD3D8.dll</li>
-      <li>VBoxD3D9.dll</li>
-      <li>VBoxOGL.dll</li>
-      <li>VBoxOGLarrayspu.dll</li>
-      <li>VBoxOGLcrutil.dll</li>
-      <li>VBoxOGLerrorspu.dll</li>
-      <li>VBoxOGLfeedbackspu.dll</li>
-      <li>VBoxOGLpackspu.dll</li>
-      <li>VBoxOGLpassthroughspu.dll</li>
-      <li>wined3d.dll</li>
-      <li><a href="(/myblog/assets/posts/enable-direct3d-in-win2k-vbox/Kernel31.7z)">Kernel31.dll</a></li>
-    </ul>
-  </li>
-</ol>
+</ul>
 
-<p>4) Finally, run <code class="language-plaintext highlighter-rouge">dxdiag</code> to see if the Direct3D acceleration is working.<br />
-It is expected to fail in Direct3D 7, but succeed in Direct3D 8 and 9 test.<br />
-Here is a screenshot running Touhou games in Win2k VBox guest:<br />
-<img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/proof-running-touhou-rss.png" alt="img" /></p>
+<p>Finally, run <code class="language-plaintext highlighter-rouge">dxdiag</code> to see if the Direct3D acceleration is working.<br />
+It is expected to fail in Direct3D 7, but succeed in Direct3D 8 and 9 test.</p>
+
+<p>Here is the result:
+<img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/result.png" alt="img" /></p>
 
 <h2 id="part-x-creating-the-kernel31dll">Part X: Creating the Kernel31.dll</h2>
 
-<p>When you read this, I assume you already know how to create a DLL and export C function, so I’m just going to key out some tips on creating the DLL.</p>
+<p>If you read this, I assume you already know how to create a DLL and export C functions. Here I’m just going to list out the important points. For complete source code, please refer to my <a href="https://github.com/Raymai97/vbox-d3d-on-w2k">repo</a>.</p>
 
 <ul>
-  <li>First, determine a list of <code class="language-plaintext highlighter-rouge">kernel32</code> APIs to be handled.</li>
-  <li>You can use Dumpbin to find out what APIs are used by a DLL.</li>
-  <li>You should handle all DLLs mentioned in Part 2.</li>
-  <li>To forward API calls, write corresponding pragma to instruct the linker about it. For example, if the API name is <code class="language-plaintext highlighter-rouge">AddVectoredExceptionHandler</code>, you write the pragma like this:
+  <li>
+    <p>First, find out what <code class="language-plaintext highlighter-rouge">kernel32</code> APIs are needed by the related DLLs.</p>
+  </li>
+  <li>
+    <p>Then, find out what <code class="language-plaintext highlighter-rouge">kernel32</code> APIs are already available in Win2000.</p>
+  </li>
+  <li>For APIs that are already available in Win2000, you just need to forward API calls.<br />
+To forward API calls, use pragma to instruct the linker to do so.<br />
+For example, if the API name is <code class="language-plaintext highlighter-rouge">AddVectoredExceptionHandler</code>, you write the pragma like this:
     <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#pragma comment(linker, "/export:AddVectoredExceptionHandler=kernel32.AddVectoredExceptionHandler")
 </span></code></pre></div>    </div>
     <p>to forward the API call to the real <code class="language-plaintext highlighter-rouge">kernel32.dll</code>.</p>
   </li>
-  <li>If you want to provide your own implementation, you forward the API call to your own exported function, with pragma like this:
+  <li>For APIs that are required but not available in Win2000, you need to write the function yourself.<br />
+Then, forward the API call to your own exported function, with pragma like this:
     <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#pragma comment(linker, "/export:AddVectoredExceptionHandler=kernel31.My_AddVectoredExceptionHandler")
 </span></code></pre></div>    </div>
     <p>And remember to export the function you specified. In this example, it is <code class="language-plaintext highlighter-rouge">My_AddVectoredExceptionHandler</code>.</p>
@@ -183,6 +202,14 @@ Here is a screenshot running Touhou games in Win2k VBox guest:<br />
 
 <p><img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/bad-example.png" alt="img" />
 <img src="/myblog/assets/posts/enable-direct3d-in-win2k-vbox/good-example.png" alt="img" /></p>
+
+<p>Pro Tips:</p>
+<ul>
+  <li>To build a lean DLL for Win2000, try older MSVC such as “Visual C++ 5.0”.</li>
+  <li>Use Dumpbin to get the EXPORTS and IMPORTS of DLL.<br />
+IMPORTS let you know what APIs are needed by a DLL.<br />
+EXPORTS let you know what APIs are provided by a DLL.</li>
+</ul>
 
   </div><a class="u-url" href="/myblog/enable-direct3d-in-win2k-vbox" hidden></a>
 </article>
