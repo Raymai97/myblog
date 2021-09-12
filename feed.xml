@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raymai97.github.io/myblog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raymai97.github.io/myblog/" rel="alternate" type="text/html" /><updated>2021-09-12T20:15:52+08:00</updated><id>https://raymai97.github.io/myblog/feed.xml</id><title type="html">myblog - raymai97</title><subtitle>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
-</subtitle><entry><title type="html">Install Windows NT 3.50 in VirtualBox</title><link href="https://raymai97.github.io/myblog/install-winnt350-in-vbox" rel="alternate" type="text/html" title="Install Windows NT 3.50 in VirtualBox" /><published>2021-09-12T19:00:00+08:00</published><updated>2021-09-12T19:00:00+08:00</updated><id>https://raymai97.github.io/myblog/install-winnt350-in-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/install-winnt350-in-vbox">&lt;p&gt;&lt;img src=&quot;(% winnt350_in_vbox.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raymai97.github.io/myblog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raymai97.github.io/myblog/" rel="alternate" type="text/html" /><updated>2021-09-12T20:24:32+08:00</updated><id>https://raymai97.github.io/myblog/feed.xml</id><title type="html">myblog - raymai97</title><subtitle>A general blog sharing stuff about Windows, Visual Studio, Programming, Anime, Games and anything from my thought.
+</subtitle><entry><title type="html">Install Windows NT 3.50 in VirtualBox</title><link href="https://raymai97.github.io/myblog/install-winnt350-in-vbox" rel="alternate" type="text/html" title="Install Windows NT 3.50 in VirtualBox" /><published>2021-09-12T19:00:00+08:00</published><updated>2021-09-12T19:00:00+08:00</updated><id>https://raymai97.github.io/myblog/install-winnt350-in-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/install-winnt350-in-vbox">&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/winnt350_in_vbox.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Environment:&lt;/p&gt;
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ISO name: en_winnt_3.5_wks.iso
@@ -18,24 +18,23 @@ VirtualBox: version 5.2.44 r139111
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;4) Go through the text-mode setup as per usual.&lt;br /&gt;
-&lt;img src=&quot;(% textmode_ing.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/textmode_ing.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;5) When the text-mode setup is done, it will ask to press any key to reboot.
 Whatever you do, DO NOT boot into WinNT yet, shut it down first.&lt;br /&gt;
-&lt;img src=&quot;(% textmode_done.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/textmode_done.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;6) WinNT 3.50 is very old. Its CPU detection will not work with modern CPU.&lt;br /&gt;
 If we boot into WinNT without any tweak, it will say something like&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Setup cannot install on the current processor.&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Setup cannot install on the current processor.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;To overcome this issue, we need to manually specify the CPU ID.&lt;br /&gt;
 This can be done by modifying “initial.inf” and “setup.inf”.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;(% mod1.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/mod1.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;(% mod2.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/mod2.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;While we can boot into MS-DOS, use EDIT.COM to modify the files, I prefer mounting VHD, modify and dismount VHD.&lt;/p&gt;
@@ -44,7 +43,7 @@ This can be done by modifying “initial.inf” and “setup.inf”.&lt;/p&gt;
 &lt;p&gt;After these files are modified, boot the VM.&lt;/p&gt;
 
 &lt;p&gt;7) If your see GUI mode setup as below, congratulations!
-&lt;img src=&quot;(% congraz.png %)&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/myblog/assets/posts/install-winnt350-in-vbox/congraz.png&quot; alt=&quot;img&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;From this point, there’s nothing particular to take note.&lt;br /&gt;
 Just complete installation as usual and enjoy your WinNT 3.50 in VirtualBox. :)&lt;/p&gt;</content><author><name></name></author><category term="windows" /><category term="winnt3x" /><category term="vm" /><category term="vbox" /><summary type="html"></summary></entry><entry><title type="html">Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)</title><link href="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox" rel="alternate" type="text/html" title="Enable Direct3D acceleration in Windows 2000 in VirtualBox (Updated)" /><published>2021-08-29T13:42:00+08:00</published><updated>2021-08-29T13:42:00+08:00</updated><id>https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox</id><content type="html" xml:base="https://raymai97.github.io/myblog/enable-direct3d-in-win2k-vbox">&lt;p&gt;Yes, you read it right. This is done by backporting files for WinXP back to Win2000.&lt;/p&gt;

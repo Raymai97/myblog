@@ -59,7 +59,7 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p><img src="(% winnt350_in_vbox.png %)" alt="img" /></p>
+    <p><img src="/myblog/assets/posts/install-winnt350-in-vbox/winnt350_in_vbox.png" alt="img" /></p>
 
 <p>Environment:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ISO name: en_winnt_3.5_wks.iso
@@ -78,24 +78,23 @@ VirtualBox: version 5.2.44 r139111
 </code></pre></div></div>
 
 <p>4) Go through the text-mode setup as per usual.<br />
-<img src="(% textmode_ing.png %)" alt="img" /></p>
+<img src="/myblog/assets/posts/install-winnt350-in-vbox/textmode_ing.png" alt="img" /></p>
 
 <p>5) When the text-mode setup is done, it will ask to press any key to reboot.
 Whatever you do, DO NOT boot into WinNT yet, shut it down first.<br />
-<img src="(% textmode_done.png %)" alt="img" /></p>
+<img src="/myblog/assets/posts/install-winnt350-in-vbox/textmode_done.png" alt="img" /></p>
 
 <p>6) WinNT 3.50 is very old. Its CPU detection will not work with modern CPU.<br />
 If we boot into WinNT without any tweak, it will say something like</p>
-<blockquote>
-  <p>Setup cannot install on the current processor.</p>
-</blockquote>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Setup cannot install on the current processor.
+</code></pre></div></div>
 
 <p>To overcome this issue, we need to manually specify the CPU ID.<br />
 This can be done by modifying “initial.inf” and “setup.inf”.</p>
 
-<p><img src="(% mod1.png %)" alt="img" /></p>
+<p><img src="/myblog/assets/posts/install-winnt350-in-vbox/mod1.png" alt="img" /></p>
 
-<p><img src="(% mod2.png %)" alt="img" /></p>
+<p><img src="/myblog/assets/posts/install-winnt350-in-vbox/mod2.png" alt="img" /></p>
 
 <blockquote>
   <p>While we can boot into MS-DOS, use EDIT.COM to modify the files, I prefer mounting VHD, modify and dismount VHD.</p>
@@ -104,7 +103,7 @@ This can be done by modifying “initial.inf” and “setup.inf”.</p>
 <p>After these files are modified, boot the VM.</p>
 
 <p>7) If your see GUI mode setup as below, congratulations!
-<img src="(% congraz.png %)" alt="img" /></p>
+<img src="/myblog/assets/posts/install-winnt350-in-vbox/congraz.png" alt="img" /></p>
 
 <p>From this point, there’s nothing particular to take note.<br />
 Just complete installation as usual and enjoy your WinNT 3.50 in VirtualBox. :)</p>
